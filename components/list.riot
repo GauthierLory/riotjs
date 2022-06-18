@@ -1,29 +1,19 @@
 <list>
   <p if={ error } class="error">{ this.props.state.error }</p>
-<!--  <div class="dropdown is-hoverable">-->
-<!--    <div class="dropdown-trigger">-->
-<!--      <button class="button" aria-haspopup="true" aria-controls="dropdown-menu4">-->
-<!--        <span if={ !this.genreChosen }>Choisissez genre</span>-->
-<!--        <span if={ this.genreChosen }>{ this.genreChosen[0].name }</span>-->
-<!--        <span class="icon is-small">-->
-<!--        <i class="fas fa-angle-down" aria-hidden="true"></i>-->
-<!--      </span>-->
-<!--      </button>-->
-<!--    </div>-->
-<!--    <div class="dropdown-menu" id="dropdown-menu4" role="menu">-->
-<!--      <div class="dropdown-content">-->
-<!--        <div class="dropdown-item" each={genre in this.genres}>-->
-<!--          <a id={ genre.id } onclick={ filterGenre }>{ genre.name }</a>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
 
-  <select class="form-select" aria-label="Default select example">
-      <option id="#{ genre.id }" each={ genre in this.genres } value="{ genre.id }">
-          { genre.name }
-      </option>
-  </select>
-    <button class="btn" id="btn">Get the Selected Value</button>
+  <div class="dropdown">
+      <button if={ !this.genreChosen } class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown button
+      </button>
+      <button if={ this.genreChosen } class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          { this.genreChosen[0].name }
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <div class="dropdown-item" each={genre in this.genres}>
+              <a id={ genre.id } onclick={ filterGenre }>{ genre.name }</a>
+          </div>
+      </div>
+  </div>
 
   <div class="container">
     <div class="row" if={ state.results[0] }>
@@ -43,6 +33,7 @@
         </div>
     </div>
   </div>
+</div>
 <script>
   export default {
     onBeforeMount(){
@@ -59,38 +50,36 @@
               })
       this.state.results=this.props.results;
     },
-    onUpdated(){
-      this.state.results=this.props.results;
-      if(this.genres !== null){
-
-        this.state.results.forEach((element) => {
-          let genreName=[];
-          for(i of element.genre_ids){
-            // console.log(i);
-
-            genreName.push(this.genres.find((e) => e.id === i))
-            element.genreName = genreName;
+      onUpdated(){
+          this.state.results=this.props.results;
+          if(this.genres !== null){
+              this.state.results.forEach((element) => {
+                  let genreName=[];
+                  for(i of element.genre_ids){
+                      // console.log(i);
+                      genreName.push(this.genres.find((e) => e.id === i))
+                      element.genreName = genreName;
+                  }
+                  console.log(genreName);
+              })
           }
-          console.log(genreName);
-        })
-      }
-      if(this.genreId !== null){
-      console.log('plop',this.genreId);
-      this.state.results = this.props.results.filter(word => {
-        let returnCode=0;
-        for(var i = 0, len = word.genre_ids.length; i < len; i++) {
-          if(word.genre_ids[i] === parseInt(this.genreId)){
-            console.log("FOUND");
-            returnCode=1;
-            break;
+          if(this.genreId !== null){
+              console.log('plop',this.genreId);
+              this.state.results = this.props.results.filter(word => {
+                  let returnCode=0;
+                  for(var i = 0, len = word.genre_ids.length; i < len; i++) {
+                      if(word.genre_ids[i] === parseInt(this.genreId)){
+                          console.log("FOUND");
+                          returnCode=1;
+                          break;
+                      }
+                      else{
+                          console.log("NOT FOUND")
+                      }
+                  }
+                  return returnCode;
+              })
           }
-          else{
-            console.log("NOT FOUND")
-          }
-        }
-        return returnCode;
-        })
-      }
       },
       filterGenre(e){
           console.log(e.target.id);
@@ -101,6 +90,6 @@
           this.update();
       }
     }
-  </script>
+</script>
 </list>
 
