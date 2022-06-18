@@ -1,0 +1,223 @@
+<app>
+
+    <div class="row">
+      <div class="col">
+        <a class="btn btn-primary" data-toggle="collapse" href=".collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+          Cacher/afficher les notes
+        </a>
+      </div>
+      <div class="col">
+        <input onclick={ prepareTopRated } type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked="">
+        <label class="btn btn-outline-primary" for="btnradio1">Les mieux notés</label>
+      </div>
+      <div class="col-sm">
+        <input onclick={ prepareMostPopular } type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked="">
+        <label class="btn btn-outline-primary" for="btnradio2">Les plus populaires</label>
+      </div>
+      <div class="col-sm">
+        <input onclick={ prepareUpComing } type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" checked="">
+        <label class="btn btn-outline-primary" for="btnradio3">A venir</label>
+      </div>
+      <div class="col-sm">
+        <input onclick={ prepareNowPlaying } type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off" checked="">
+        <label class="btn btn-outline-primary" for="btnradio4">A l'affiche</label>
+      </div>
+      <div class="col-sm">
+        <input type="text" oninput={ prepareSearch } placeholder="Search a movie">
+      </div>
+      <div class="col-sm">
+        <ul if={ state.total_pages } class="pagination pagination-sm">
+          <li class="page-item">
+            <a class="page-link" onclick={ PreviousPage } href="#">&laquo;</a>
+          </li>
+          <li class="page-item active">
+            <a class="page-link" href="#">{state.page}/{state.total_pages}</a>
+          </li>
+          <li class="page-item">
+            <button class="page-link" onclick="{ NextPage }" href="#">&raquo;</button>
+          </li>
+        </ul>
+        <input type="reset" onclick="{ reset }" value="Reset">
+      </div>
+    </div>
+
+    <div if={this.state.loading}  class="d-flex justify-content-center">
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
+    </div>
+
+     <list results={this.state.results}/>
+
+<script>
+  export default {
+      onMounted(){
+        this.searchNowPlaying()
+      },
+      state: {
+        loading: false,
+        lastSearch: null,
+        total_pages: 0,
+        page: 1,
+        error: null,
+        results: [],
+        mode: "search",
+        genre_ids: null
+      },
+      reset() {
+        this.update({
+          loading: false,
+          error: null,
+          page: 1,
+          total_pages: 0,
+          results: [],
+          search: ''
+        })
+        this.searchNowPlaying()
+      },
+      prepareMostPopular() {
+        this.reset()
+        this.searchMostPopular()
+      },
+      prepareTopRated() {
+        this.reset()
+        this.searchTopRated()
+      },
+      prepareUpComing() {
+        this.reset()
+        this.searchUpcoming()
+      },
+      prepareNowPlaying() {
+        this.reset()
+        this.searchNowPlaying()
+      },
+      prepareSearch(e) {
+        const search = e.target.value
+        this.reset()
+        if (this.state.lastSearch !== search) {
+          this.update({ loading: true })
+          this.searchMovies(search)
+        }
+
+        this.state.lastSearch = search
+      },
+      searchMovies(search) {
+        return debounce((search) => {
+          fetch(`https://api.themoviedb.org/3/search/movie?api_key=87c2c0742f05a556efd337824f959447&language=fr-FR&query=${search}&page=${this.state.page}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (this.$('input').value) {
+                this.update({
+                  error: data.Error,
+                  results: data.results,
+                  total_pages: data.total_pages,
+                  mode:"search",
+                })
+              }
+              // console.log(this.state.results);
+              this.update({ loading: false });
+            })
+        }, 500)(search)
+      },
+      searchMostPopular() {
+        this.update({ loading: true })
+          fetch(`https://api.themoviedb.org/3/movie/popular?api_key=87c2c0742f05a556efd337824f959447&language=fr-Fr&page=${this.state.page}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (this.$('input').value) {
+                this.update({
+                  error: data.Error,
+                  results: data.results,
+                  total_pages: data.total_pages,
+                  mode:"popular"
+                })
+              }
+              // console.log(this.state.results);
+              this.update({ loading: false });
+            })
+      },
+      searchTopRated() {
+        this.update({ loading: true })
+        fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=87c2c0742f05a556efd337824f959447&language=fr-Fr&page=${this.state.page}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (this.$('input').value) {
+              this.update({
+                results: data.results,
+                total_pages: data.total_pages,
+              })
+            }
+            // console.log(this.state.results);
+            this.update({ loading: false });
+          })
+      },
+      searchUpcoming() {
+          this.update({ loading: true })
+          fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=87c2c0742f05a556efd337824f959447&language=fr-Fr&page=${this.state.page}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (this.$('input').value) {
+                this.update({
+                  error: data.Error,
+                  results: data.results,
+                  total_pages: data.total_pages,
+                  mode:"upcoming"
+                })
+              }
+              // console.log(this.state.results);
+              this.update({ loading: false });
+            })
+        },
+      searchNowPlaying() {
+        this.update({ loading: true })
+        fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=87c2c0742f05a556efd337824f959447&language=fr-FR&page=${this.state.page}&genre_ids=[28]`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (this.$('input').value) {
+              this.update({
+                error: data.Error,
+                results: data.results,
+                total_pages: data.total_pages,
+                mode:"now_playing"
+              })
+            }
+            // console.log(this.state.results);
+            this.update({ loading: false });
+          })
+      },
+      NextPage(){
+        this.state.page=this.state.page+1;
+
+        switch (this.state.mode) {
+          case "search": this.searchMovies(this.state.lastSearch);
+            break;
+          case "popular": this.searchMostPopular()
+            break;
+          case "top_rated": this.searchTopRated()
+            break;
+          case "upcoming": this.searchUpcoming()
+            break;
+          case "now_playing": this.searchNowPlaying()
+            break;
+        }
+      },
+      PreviousPage(){
+        this.state.page=this.state.page-1;
+
+        switch (this.state.mode) {
+          case "search": this.searchMovies(this.state.lastSearch);
+            break;
+          case "popular": this.searchMostPopular()
+            break;
+          case "top_rated": this.searchTopRated()
+            break;
+          case "upcoming": this.searchUpcoming()
+            break;
+          case "now_playing": this.searchNowPlaying()
+            break;
+        }
+      },
+    }
+    
+  </script>
+</app>
