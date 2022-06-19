@@ -37,7 +37,6 @@
             <button class="page-link" onclick="{ NextPage }" href="#">&raquo;</button>
           </li>
         </ul>
-        <input type="reset" onclick="{ reset }" value="Reset">
       </div>
     </div>
 
@@ -103,7 +102,7 @@
       },
       searchMovies(search) {
         return debounce((search) => {
-          fetch(`https://api.themoviedb.org/3/search/movie?api_key=87c2c0742f05a556efd337824f959447&language=fr-FR&query=${search}&page=${this.state.page}`)
+          fetch(`https://api.themoviedb.org/3/search/movie?api_key=7bac84d2bc05a101bd62d21a3df4e772&language=fr-FR&query=${search}&page=${this.state.page}`)
             .then((res) => res.json())
             .then((data) => {
               if (this.$('input').value) {
@@ -114,14 +113,13 @@
                   mode:"search",
                 })
               }
-              // console.log(this.state.results);
               this.update({ loading: false });
             })
         }, 500)(search)
       },
       searchMostPopular() {
         this.update({ loading: true })
-          fetch(`https://api.themoviedb.org/3/movie/popular?api_key=87c2c0742f05a556efd337824f959447&language=fr-Fr&page=${this.state.page}`)
+          fetch(`https://api.themoviedb.org/3/movie/popular?api_key=7bac84d2bc05a101bd62d21a3df4e772&language=fr-Fr&page=${this.state.page}`)
             .then((res) => res.json())
             .then((data) => {
               if (this.$('input').value) {
@@ -132,13 +130,12 @@
                   mode:"popular"
                 })
               }
-              // console.log(this.state.results);
               this.update({ loading: false });
             })
       },
       searchTopRated() {
         this.update({ loading: true })
-        fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=87c2c0742f05a556efd337824f959447&language=fr-Fr&page=${this.state.page}`)
+        fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=7bac84d2bc05a101bd62d21a3df4e772&language=fr-Fr&page=${this.state.page}`)
           .then((res) => res.json())
           .then((data) => {
             if (this.$('input').value) {
@@ -147,7 +144,6 @@
                 total_pages: data.total_pages,
               })
             }
-            // console.log(this.state.results);
             this.update({ loading: false });
           })
       },
@@ -164,13 +160,15 @@
                   mode:"upcoming"
                 })
               }
-              // console.log(this.state.results);
               this.update({ loading: false });
             })
         },
       searchNowPlaying() {
         this.update({ loading: true })
-        fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=87c2c0742f05a556efd337824f959447&language=fr-FR&page=${this.state.page}&genre_ids=[28]`)
+        const now_playing = 'now_playing'
+        const sort_by = 'sort_by=popularity.desc'
+
+        fetch(`https://api.themoviedb.org/3/discover/movie?${ now_playing }&api_key=87c2c0742f05a556efd337824f959447&${ sort_by }&language=fr-Fr&page=${this.state.page}`)
           .then((res) => res.json())
           .then((data) => {
             if (this.$('input').value) {
@@ -178,10 +176,9 @@
                 error: data.Error,
                 results: data.results,
                 total_pages: data.total_pages,
-                mode:"now_playing"
+                mode: now_playing
               })
             }
-            console.log(this.state.results);
             this.update({ loading: false });
           })
       },
